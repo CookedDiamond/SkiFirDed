@@ -239,7 +239,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 978146669}
   m_RootOrder: -1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -50.87}
 --- !u!212 &1373330557
 SpriteRenderer:
   m_ObjectHideFlags: 0
