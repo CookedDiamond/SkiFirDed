@@ -8,6 +8,9 @@ public class TerrainGeneration : MonoBehaviour {
 
     [SerializeField] private int positionCount = 4;
 	[SerializeField] private int downLength = 10;
+	[SerializeField] private float stepSize = 0.25f;
+	[SerializeField] private float slopePerUnit = 1;
+	[SerializeField] private float smoothness = 0.1f;
 
 	private void OnEnable() {
 		var mesh = new Mesh {
@@ -40,7 +43,7 @@ public class TerrainGeneration : MonoBehaviour {
 		Vector3[] points = new Vector3[amount];
 		// Generate the points which defin the terrain.
 		for (int i = 0; i < amount; i++) {
-			points[i] = new Vector3(i, Random.Range(-0.3f, 0.3f) - i * 0.6f, 0);
+			points[i] = new Vector3(i * stepSize, Mathf.PerlinNoise1D(i * stepSize * smoothness) - (i * stepSize) * slopePerUnit, 0);
 		}
 
 		return points;
