@@ -157,11 +157,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 941947239}
-  positionCount: 200
+  positionCount: 50
   downLength: -10
-  stepSize: 0.1
+  stepSize: 0.5
   slopePerUnit: 0.4
   smoothness: 0.1
+  newGenAmount: 20
+  terrainList: []
 --- !u!68 &206497316
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -428,7 +430,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6326192985948209154, guid: 7886fa6a6813176479936a3172cc868a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.86
+      value: 13.31
       objectReference: {fileID: 0}
     - target: {fileID: 6326192985948209154, guid: 7886fa6a6813176479936a3172cc868a, type: 3}
       propertyPath: m_LocalPosition.z

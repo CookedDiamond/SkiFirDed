@@ -12,10 +12,12 @@ public class TerrainGeneration : MonoBehaviour {
 	[SerializeField] private float stepSize = 0.25f;
 	[SerializeField] private float slopePerUnit = 1;
 	[SerializeField] private float smoothness = 0.1f;
+	[SerializeField] private int newGenAmount = 10;
 
-	private List<Vector3> terrainList = new List<Vector3>();
+	[SerializeField] private List<Vector3> terrainList = new List<Vector3>();
 	private Mesh mesh;
-	private int globalLastIndex = 0;
+	private int globalIndex = 0;
+	private int updateCounter = 0;
 
 	private void OnEnable() {
 		mesh = new Mesh {
@@ -41,10 +43,14 @@ public class TerrainGeneration : MonoBehaviour {
 
     public void Update()
     {
-		if (player.transform.position.x + 10 > terrainList.Last().x)
+		if (player.transform.position.x + 10 > terrainList.Last().x + transform.position.x)
 		{
-			terrainList.RemoveRange(0, 10);
-			generatePoints(10);
+			updateCounter++;
+			terrainList.RemoveRange(0, newGenAmount);
+			generatePoints(newGenAmount);
+			transform.position = new Vector3(x: transform.position.x + newGenAmount * stepSize, 
+				y: transform.position.y - (newGenAmount * slopePerUnit * stepSize), 
+				transform.position.z);
 			buildMesh();
 		}
     }
@@ -62,11 +68,23 @@ public class TerrainGeneration : MonoBehaviour {
 
 	private List<Vector3> generatePoints(int amount) {
 		List<Vector3> points = terrainList;
+
 		// Generate the points which defin the terrain.
 		for (int i = 0; i < amount; i++) {
-			points.Add(new Vector3(globalLastIndex * stepSize, 
-				Mathf.PerlinNoise1D(globalLastIndex * stepSize * smoothness) - (globalLastIndex * stepSize) * slopePerUnit, 0));
-			globalLastIndex++;
+			// x coordinate is set later to move them according to the game object.
+			points.Add(new Vector3(0,
+				-(globalIndex * stepSize) * slopePerUnit
+				+ Mathf.PerlinNoise1D(globalIndex * stepSize * smoothness)
+				+ updateCounter * newGenAmount * slopePerUnit * stepSize
+				, 0));
+			globalIndex++;
+		}
+
+		float containerXPos = transform.position.x;
+		// Move the points back, so they stay inside the game object.
+		for (int i = 0; i < points.Count; i++) {
+			points[i] = new Vector3(x: i * stepSize, 
+				y: points[i].y + (newGenAmount * slopePerUnit * stepSize), 0);
 		}
 
 		return points;
