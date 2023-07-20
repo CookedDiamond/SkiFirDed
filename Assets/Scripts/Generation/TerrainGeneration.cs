@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(EdgeCollider2D))]
 public class TerrainGeneration : MonoBehaviour {
@@ -12,23 +13,43 @@ public class TerrainGeneration : MonoBehaviour {
 	[SerializeField] private float slopePerUnit = 1;
 	[SerializeField] private float smoothness = 0.1f;
 
+	private List<Vector3> terrainList = new List<Vector3>();
+	private Mesh mesh;
+	private int globalLastIndex = 0;
+
 	private void OnEnable() {
-		var mesh = new Mesh {
+		mesh = new Mesh {
 			name = "Terrain"
 		};
-		Vector3[] terrain = generatePoints(positionCount);
-		mesh.vertices = convertPointsToVertices(terrain);
-		int[] triangles = new int[positionCount * 6 - 6];
-		for (int i = 0; i < triangles.Length; i++) {
-			triangles[i] = i;
-		}
-		mesh.triangles = triangles;
-		GetComponent<MeshFilter>().mesh = mesh;
-
-		updateCollider(terrain);
+		terrainList = generatePoints(positionCount);
+		buildMesh();
 	}
 
-	private void updateCollider(Vector3[] points) {
+	private void buildMesh()
+	{
+        mesh.vertices = convertPointsToVertices(terrainList.ToArray());
+        int[] triangles = new int[terrainList.Count * 6 - 6];
+        for (int i = 0; i < triangles.Length; i++)
+        {
+            triangles[i] = i;
+        }
+        mesh.triangles = triangles;
+        GetComponent<MeshFilter>().mesh = mesh;
+
+        updateCollider(terrainList.ToArray());
+    }
+
+    public void Update()
+    {
+		if (player.transform.position.x + 10 > terrainList.Last().x)
+		{
+			terrainList.RemoveRange(0, 10);
+			generatePoints(10);
+			buildMesh();
+		}
+    }
+
+    private void updateCollider(Vector3[] points) {
 		EdgeCollider2D collider = GetComponent<EdgeCollider2D>();
 
 		Vector2[] points2d = new Vector2[points.Length];
@@ -39,11 +60,13 @@ public class TerrainGeneration : MonoBehaviour {
 		collider.points = points2d;
 	}
 
-	private Vector3[] generatePoints(int amount) {
-		Vector3[] points = new Vector3[amount];
+	private List<Vector3> generatePoints(int amount) {
+		List<Vector3> points = terrainList;
 		// Generate the points which defin the terrain.
 		for (int i = 0; i < amount; i++) {
-			points[i] = new Vector3(i * stepSize, Mathf.PerlinNoise1D(i * stepSize * smoothness) - (i * stepSize) * slopePerUnit, 0);
+			points.Add(new Vector3(globalLastIndex * stepSize, 
+				Mathf.PerlinNoise1D(globalLastIndex * stepSize * smoothness) - (globalLastIndex * stepSize) * slopePerUnit, 0));
+			globalLastIndex++;
 		}
 
 		return points;

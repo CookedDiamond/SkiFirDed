@@ -15,6 +15,5 @@ public class VelocityLimiter : MonoBehaviour
 	private void FixedUpdate()
 	{
 		rb.velocity *= velocityFactor;
-		print(rb.velocity.magnitude);
 	}
 }
